@@ -343,3 +343,23 @@ See [Plugin docs](./plugins.md)
 
 - [ ] Needs more testing
 - [ ] Make sure there are no unknown major problems
+
+## Sharding / HAMT
+
+### In Version
+0.4.8
+
+### State
+Experimental
+
+Currently, when too many items are added into a unixfs directory, the object gets too large and you may experience issues. To pervent this problem, and generally make working really large directories more efficient, we have implemented a HAMT structure for unixfs. To enable this feature, run:
+
+### Basic Usage:
+
+```
+ipfs config --json Experimental.ShardingEnabled true
+```
+
+### Road to being a real feature
+
+XX Please someone fill this out
