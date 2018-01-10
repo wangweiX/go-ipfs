@@ -52,6 +52,24 @@ type Pin interface {
 	Type() string
 }
 
+// PinStatus holds information about pin health
+type PinStatus interface {
+	// Ok indicates whether the pin has been verified to be correct
+	Ok() bool
+
+	// BadNodes returns any bad (usually missing) nodes from the pin
+	BadNodes() []BadPinNode
+}
+
+// BadPinNode is a node that has been marked as bad by Pin.Verify
+type BadPinNode interface {
+	// Path is the path of the node
+	Path() Path
+
+	// Err is the reason why the node has been marked as bad
+	Err() error
+}
+
 // CoreAPI defines an unified interface to IPFS for Go programs.
 type CoreAPI interface {
 	// Unixfs returns an implementation of Unixfs API
@@ -59,6 +77,7 @@ type CoreAPI interface {
 	Dag() DagAPI
 	Name() NameAPI
 	Key() KeyAPI
+	Pin() PinAPI
 
 	// ResolvePath resolves the path using Unixfs resolver
 	ResolvePath(context.Context, Path) (Path, error)
@@ -220,7 +239,7 @@ type PinAPI interface {
 	WithRecursive(bool) options.PinAddOption
 
 	// Ls returns list of pinned objects on this node
-	Ls(context.Context) ([]Pin, error)
+	Ls(context.Context, ...options.PinLsOption) ([]Pin, error)
 
 	// WithType is an option for Ls which allows to specify which pin types should
 	// be returned
@@ -238,10 +257,10 @@ type PinAPI interface {
 
 	// Update changes one pin to another, skipping checks for matching paths in
 	// the old tree
-	Update(ctx context.Context, from Path, to Path) error
+	Update(ctx context.Context, from Path, to Path, opts ...options.PinUpdateOption) error
 
 	// Verify verifies the integrity of pinned objects
-	Verify(context.Context) error
+	Verify(context.Context) (<-chan PinStatus, error)
 }
 
 var ErrIsDir = errors.New("object is a directory")
